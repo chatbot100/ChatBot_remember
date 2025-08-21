@@ -38,7 +38,7 @@ def get_unique_doc_types(year):
     Возвращает список уникальных названий документов для конкретного года
     """
     doc_types = []
-    is_onegdkp = 0
+    num = 0
     directory = f"Данные/{year}"
 
     if not os.path.exists(directory):
@@ -48,17 +48,19 @@ def get_unique_doc_types(year):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
             if item == 'ОНДКП':
-                is_onegdkp = 1
+                num = 1
                 doc_types.insert(0, item)
     
     for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
             if item.partition('-')[0] == 'ССП':
-                doc_types.insert(int(item.split('-')[1]) - 1 + is_onegdkp, item.split('-')[0] + '-' + item.split('-')[2])
-        
-        elif item.partition('-')[0] == 'КСП':
-                doc_types.insert(int(item.split('-')[1]) - 1 + is_onegdkp, item.split('-')[0] + '-' + item.split('-')[2].split('.')[0])
+                doc_types.insert(int(item.split('-')[1]) - 1 + num, item.split('-')[0] + '-' + item.split('-')[2])
+                num = num + 1
+
+    for item in os.listdir(directory):
+        if item.partition('-')[0] == 'КСП':
+            doc_types.insert(int(item.split('-')[1]) - 1 + num, item.split('-')[0] + '-' + item.split('-')[2].split('.')[0])
     
     return doc_types
 
