@@ -54,12 +54,12 @@ def get_unique_doc_types(year):
     for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
-            if item.partition('-')[0] == 'ССП':
+            if item.partition('-')[0] == 'Базовый прогноз':
                 doc_types.insert(int(item.split('-')[1]) - 1 + num, item.split('-')[0] + '-' + item.split('-')[2])
                 num = num + 1
 
     for item in os.listdir(directory):
-        if item.partition('-')[0] == 'КСП':
+        if item.partition('-')[0] == 'Краткосрочный прогноз':
             doc_types.insert(int(item.split('-')[1]) - 1 + num, item.split('-')[0] + '-' + item.split('-')[2].split('.')[0])
     
     return doc_types
@@ -87,7 +87,7 @@ def get_var_type(year, doc_item, scenario):
     var_types = set()
     if doc_item == 'ОНДКП':
         directory = f"Данные/{year}/{doc_item}/{scenario}"
-    elif doc_item.split('-')[0] == 'ССП':
+    elif doc_item.split('-')[0] == 'Базовый прогноз':
         directory = f"Данные/{year}/{doc_item}"
     for item in os.listdir(directory):
         var_types.add(item.split('.')[0])
@@ -158,7 +158,7 @@ async def doc_type_received(update, context):
     
         return SCENARIO
     
-    elif doc_type.split('-')[0] == 'ССП':
+    elif doc_type.split('-')[0] == 'Базовый прогноз':
         for item in os.listdir(directory):
             full_path = os.path.join(directory, item)
             if os.path.isdir(full_path):
@@ -166,7 +166,7 @@ async def doc_type_received(update, context):
                     context.user_data['doc_item'] = item
         return await scenario_received(update, context)
 
-    elif doc_type.split('-')[0] == 'КСП':
+    elif doc_type.split('-')[0] == 'Краткосрочный прогноз':
         for item in os.listdir(directory):
             full_path = os.path.join(directory, item)
             if item.split('-')[0] == doc_type.split('-')[0] and item.split('-')[2].split('.')[0] == doc_type.split('-')[1]:
@@ -201,7 +201,7 @@ async def scenario_received(update, context):
         return VAR_GROUP
 
     
-    elif context.user_data['doc'].split('-')[0] == 'ССП':
+    elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         context.user_data['scenario'] = '-'
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         context.user_data['path_folders'] = path
@@ -215,14 +215,14 @@ async def scenario_received(update, context):
         return VAR_GROUP
         
 
-    elif context.user_data['doc'].split('-')[0] == 'КСП':
+    elif context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         context.user_data['scenario'] = '-'
         context.user_data['path_folders'] = f"Данные/{context.user_data['year']}/{context.user_data['doc_item']}"
         
         return await var_group_received(update, context)
 
 async def var_group_received(update, context):
-    if context.user_data['doc'] == 'ОНДКП' or context.user_data['doc'].split('-')[0] == 'ССП':
+    if context.user_data['doc'] == 'ОНДКП' or context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         if update.message.text not in var_types and update.message.text != 'Выбрать другую переменную':
             keyboard = [var_types]
@@ -240,7 +240,7 @@ async def var_group_received(update, context):
             if item.split('.')[0] == context.user_data['var_group']:
                 context.user_data['path'] = context.user_data['path_folders'] + '/' + item
     
-    elif context.user_data['doc'].split('-')[0] == 'КСП':
+    elif context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         context.user_data['var_group'] = '-'
         context.user_data['path'] = context.user_data['path_folders']
     
@@ -255,12 +255,12 @@ async def var_group_received(update, context):
             f"Вы выбрали группу переменных \"{context.user_data['var_group']}\" из {context.user_data['doc']}-{context.user_data['year']} сценария \"{context.user_data['scenario']}\". Какая переменная Вас интересует?", 
             reply_markup = reply_markup)
     
-    elif context.user_data['doc'].split('-')[0] == 'ССП':
+    elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         await update.message.reply_text(
             f"Вы выбрали группу переменных \"{context.user_data['var_group']}\" из {context.user_data['doc']}-{context.user_data['year']}. Какая переменная Вас интересует?", 
             reply_markup = reply_markup)
     
-    elif context.user_data['doc'].split('-')[0] == 'КСП':
+    elif context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         await update.message.reply_text(
             f"Вы выбрали {context.user_data['doc']}-{context.user_data['year']}. Какая переменная Вас интересует?", 
             reply_markup = reply_markup)
@@ -287,7 +287,7 @@ async def vars_received(update, context):
     df = pd.read_excel(context.user_data['path'])
     pred_years = list(df.columns)[1:]
 
-    if context.user_data['doc'].split('-')[0] == 'КСП':
+    if context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         keyboard = [['Выбрать другую переменную'], ['Заново'], ['Завершить']]
     else:
         keyboard = [['Выбрать другую переменную'], ['Выбрать другой набор переменных'], ['Заново'], ['Завершить']]
@@ -296,14 +296,11 @@ async def vars_received(update, context):
 
     if context.user_data['doc'] == 'ОНДКП':
         text = [f"Прогноз \"{context.user_data['var']}\" из {context.user_data['doc']}-{context.user_data['year']} сценария \"{context.user_data['scenario']}\":"]
-    elif context.user_data['doc'].split('-')[0] == 'ССП' or context.user_data['doc'].split('-')[0] == 'КСП':
+    elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз' or context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         text = [f"Прогноз \"{context.user_data['var']}\" из {context.user_data['doc']}-{context.user_data['year']}:"]
     
     for col in df.columns[1:]:
-        if pd.isna(df[df.iloc[:, 0] == context.user_data['var']][col].values[0]):
-            text.append(f"{col}: Был факт")
-        else:
-            text.append(f"{col}: {df[df.iloc[:, 0] == context.user_data['var']][col].values[0]}")
+        text.append(f"{col}: {df[df.iloc[:, 0] == context.user_data['var']][col].values[0]}")
     
     await update.message.reply_text( "\n".join(text), 
             reply_markup = reply_markup)
@@ -311,7 +308,7 @@ async def vars_received(update, context):
     return PRED
 
 async def pred_received(update, context):
-    if context.user_data['doc'].split('-')[0] == 'КСП':
+    if context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         com = ['Заново', 'Выбрать другую переменную', 'Завершить']
         keyboard = [['Выбрать другую переменную'], ['Заново'], ['Завершить']]
     else:
@@ -338,10 +335,15 @@ async def pred_received(update, context):
         return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    if context.user_data.get('cancelled'):
+        return ConversationHandler.END
+    
     await update.message.reply_text(
         'Действие отменено. Для начала введите /start',
         reply_markup=ReplyKeyboardRemove()
     )
+
+    context.user_data['cancelled'] = True
     return ConversationHandler.END
 
 async def post_init(application: Application) -> None:
