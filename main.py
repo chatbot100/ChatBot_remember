@@ -205,8 +205,9 @@ async def scenario_received(update, context):
         context.user_data['scenario'] = '-'
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         context.user_data['path_folders'] = path
-        
-        keyboard = [var_types]
+
+        var_types = sorted(var_types, reverse=True)
+        keyboard = [[type] for type in var_types]
         reply_markup_year = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             f"Вы выбрали {context.user_data['doc']}-{context.user_data['year']}. Переменные из какого набора Вас интересуют?", 
@@ -225,7 +226,8 @@ async def var_group_received(update, context):
     if context.user_data['doc'] == 'ОНДКП' or context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         if update.message.text not in var_types and update.message.text != 'Выбрать другую переменную':
-            keyboard = [var_types]
+            var_types = sorted(var_types, reverse=True)
+            keyboard = [[type] for type in var_types]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await update.message.reply_text(
             "Пожалуйста, выберите группу переменных из предложенных вариантов:",
