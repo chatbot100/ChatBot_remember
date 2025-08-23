@@ -50,7 +50,14 @@ def get_doc_types_keyboard(year):
             if item == 'ОНДКП':
                 keyboard_doc_types = keyboard_doc_types + [[item]]
 
-    b_doc_types = []
+    b_num = 0
+    for item in os.listdir(directory):
+        full_path = os.path.join(directory, item)
+        if os.path.isdir(full_path):
+            if item.partition('-')[0] == 'Базовый прогноз':
+                b_num = b_num + 1
+                
+    b_doc_types = [0] * b_num
     for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
@@ -60,7 +67,14 @@ def get_doc_types_keyboard(year):
     b_doc_types = [b_doc_types[i:i+2] for i in range(0, len(b_doc_types), 2)]
     keyboard_doc_types = keyboard_doc_types + b_doc_types
 
-    k_doc_types = []
+    k_num = 0
+    for item in os.listdir(directory):
+        full_path = os.path.join(directory, item)
+        if os.path.isdir(full_path):
+            if item.partition('-')[0] == 'Краткосрочный прогноз':
+                k_num = k_num + 1
+                
+    k_doc_types = [0] * k_num
     for item in os.listdir(directory):
         if item.partition('-')[0] == 'Краткосрочный прогноз':
             k_doc_types.insert(int(item.split('-')[1]) - 1, item.split('-')[0] + '-' + item.split('-')[2].split('.')[0])
