@@ -33,54 +33,41 @@ def get_unique_doc_years(directory):
     
     return unique_years
 
-def get_unique_doc_types(year):
+def get_doc_types_keyboard(year):
     """
     Возвращает список уникальных названий документов для конкретного года
     """
-    doc_types = []
     num = 0
     directory = f"Данные/{year}"
 
     if not os.path.exists(directory):
         raise FileNotFoundError(f"Директория '{directory}' не существует")
-    
+
+    keyboard_doc_types = []
     for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
             if item == 'ОНДКП':
-                num = 1
-                doc_types.insert(0, item)
-    
+                keyboard_doc_types = keyboard_doc_types + [[item]]
+
+    b_doc_types = []
     for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
             if item.partition('-')[0] == 'Базовый прогноз':
-                doc_types.insert(int(item.split('-')[1]) - 1 + num, item.split('-')[0] + '-' + item.split('-')[2])
-                num = num + 1
+                b_doc_types.insert(int(item.split('-')[1]) - 1, item.split('-')[0] + '-' + item.split('-')[2])
+    
+    b_doc_types = [b_doc_types[i:i+2] for i in range(0, len(b_doc_types), 2)]
+    keyboard_doc_types = keyboard_doc_types + b_doc_types
 
+    k_doc_types = []
     for item in os.listdir(directory):
         if item.partition('-')[0] == 'Краткосрочный прогноз':
-            doc_types.insert(int(item.split('-')[1]) - 1 + num, item.split('-')[0] + '-' + item.split('-')[2].split('.')[0])
+            k_doc_types.insert(int(item.split('-')[1]) - 1, item.split('-')[0] + '-' + item.split('-')[2].split('.')[0])
     
-    return doc_types
-
-def get_doc_types_keyboard(buttons):
-    keyboard = []
-    row = []
-    s = 0
-    n = 0
-    prev_button = buttons[0]
-    for button in buttons:
-        row.append(button)
-        s = s + 1
-        n = n + 1
-        if s % 2 == 0 or button != prev_button or n == len(buttons):
-            keyboard.append(row)
-            row = []
-        if button != prev_button:
-            s = 0
-        prev_button = button
-    return keyboard
+    k_doc_types = [k_doc_types[i:i+2] for i in range(0, len(k_doc_types), 2)]
+    keyboard_doc_types = keyboard_doc_types + k_doc_types
+    return keyboard_doc_types
 
 def get_unique_scenarios(year):
     unique_scenarios = set()
@@ -128,8 +115,7 @@ async def year_received(update, context):
     year = update.message.text
     context.user_data['year'] = year
 
-    buttons = get_unique_doc_types(context.user_data['year'])
-    keyboard = get_doc_types_keyboard(buttons)
+    keyboard = get_doc_types_keyboard(context.user_data['year'])
 
     reply_markup_doc_type = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
@@ -140,9 +126,9 @@ async def year_received(update, context):
     return DOC
 
 async def doc_type_received(update, context):
-    docs = get_unique_doc_types(context.user_data['year'])
+    keyboard = get_doc_types_keyboard(context.user_data['year'])
+    docs = sum(keyboard, [])
     if update.message.text not in docs:
-        keyboard = get_doc_types_keyboard(docs)
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             "Пожалуйста, выберите документ из предложенных вариантов:",
