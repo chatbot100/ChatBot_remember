@@ -68,11 +68,13 @@ def get_doc_types_keyboard(buttons):
     keyboard = []
     row = []
     s = 0
+    n = 0
     prev_button = buttons[0]
     for button in buttons:
         row.append(button)
         s = s + 1
-        if s % 2 == 0 or button != prev_button or i == len(buttons):
+        n = n + 1
+        if s % 2 == 0 or button != prev_button or n == len(buttons):
             keyboard.append(row)
             row = []
         if button != prev_button:
