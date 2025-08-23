@@ -192,7 +192,8 @@ async def scenario_received(update, context):
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         context.user_data['path_folders'] = path
 
-        keyboard = [var_types]
+        var_types = sorted(var_types, reverse=True)
+        keyboard = [[type] for type in var_types]
         reply_markup_year = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             f"Вы выбрали сценарий \"{context.user_data['scenario']}\" из {context.user_data['doc']}-{context.user_data['year']}. Переменные из какого набора Вас интересуют?", 
