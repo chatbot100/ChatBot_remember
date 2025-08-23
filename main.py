@@ -69,7 +69,7 @@ def get_doc_types_keyboard(buttons):
     row = []
     for i, button in enumerate(buttons, 1):
         row.append(button)
-        if i % 3 == 0 or button == 'ОНДКП' or i == len(buttons):
+        if i % 2 == 0 or button == 'ОНДКП' or i == len(buttons):
             keyboard.append(row)
             row = []
     return keyboard
