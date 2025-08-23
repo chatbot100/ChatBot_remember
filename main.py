@@ -67,11 +67,13 @@ def get_unique_doc_types(year):
 def get_doc_types_keyboard(buttons):
     keyboard = []
     row = []
+    prev_button = buttons[0]
     for i, button in enumerate(buttons, 1):
         row.append(button)
-        if i % 2 == 0 or button == 'ОНДКП' or i == len(buttons):
+        if i % 2 == 0 or button != prev_button or i == len(buttons):
             keyboard.append(row)
             row = []
+        prev_button = button
     return keyboard
 
 def get_unique_scenarios(year):
