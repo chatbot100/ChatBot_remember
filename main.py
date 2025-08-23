@@ -148,7 +148,7 @@ async def doc_type_received(update, context):
     directory = f"Данные/{context.user_data['year']}"
     if doc_type == 'ОНДКП':
         context.user_data['doc_item'] = doc_type
-        buttons = get_unique_scenarios(context.user_data['year'])
+        buttons = sorted(get_unique_scenarios(context.user_data['year']))
         keyboard = [buttons[i:i+2] for i in range(0, len(buttons), 2)]
         reply_markup_doc_type = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
@@ -175,7 +175,7 @@ async def doc_type_received(update, context):
 
 async def scenario_received(update, context):
     if context.user_data['doc'] == 'ОНДКП':
-        scenarios = get_unique_scenarios(context.user_data['year'])
+        scenarios = sorted(get_unique_scenarios(context.user_data['year']))
         if update.message.text not in scenarios  and update.message.text != 'Выбрать другой набор переменных':
             keyboard = [scenarios[i:i+2] for i in range(0, len(scenarios), 2)]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
