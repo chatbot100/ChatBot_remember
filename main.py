@@ -104,7 +104,7 @@ async def start(update, context):
 
 async def year_received(update, context):
     years = get_unique_doc_years('Данные')
-    if update.message.text not in years and update.message.text!='Возврат к выбору года':
+    if update.message.text not in years and update.message.text!='Возврат к выбору документа':
         keyboard = [years[i:i+3] for i in range(0, len(years), 3)]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
@@ -133,7 +133,7 @@ async def doc_type_received(update, context):
     keyboard = get_doc_types_keyboard(context.user_data['year'])
     docs = sum(keyboard, [])
     keyboard = keyboard + [['Возврат к выбору года']]
-    if update.message.text not in docs:
+    if update.message.text not in docs and update.message.text!='Возврат к выбору года':
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             "Пожалуйста, выберите документ из предложенных вариантов:",
@@ -176,7 +176,7 @@ async def doc_type_received(update, context):
 async def scenario_received(update, context):
     if update.message.text == 'Возврат к выбору документа':
         return await year_received(update, context)
-    if context.user_data['doc'] == 'ОНДКП':
+    if context.user_data['doc'] == 'ОНДКП' and :
         scenarios = sorted(get_unique_scenarios(context.user_data['year']))
         if update.message.text not in scenarios  and update.message.text != 'Выбрать другой набор переменных' and update.message.text != 'Возврат к выбору набора переменных':
             keyboard = [scenarios[i:i+2] for i in range(0, len(scenarios), 2)] + [['На предыдущий шаг']]
