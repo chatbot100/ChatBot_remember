@@ -128,7 +128,7 @@ async def year_received(update, context):
 
 async def doc_type_received(update, context):
     if update.message.text == 'На предыдущий шаг':
-        return await year_received(update, context)
+        return await start(update, context)
         
     keyboard = get_doc_types_keyboard(context.user_data['year'])
     docs = sum(keyboard, [])
