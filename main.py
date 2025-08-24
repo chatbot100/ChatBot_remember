@@ -195,7 +195,7 @@ async def scenario_received(update, context):
         context.user_data['path_folders'] = path
 
         var_types = sorted(var_types, reverse=True)
-        keyboard = [[type] for type in var_types] + [['Выбрать другой сценарий']]
+        keyboard = [[type] for type in var_types] + [['Возврат к выбору сценария']]
         reply_markup_year = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             f"Вы выбрали сценарий \"{context.user_data['scenario']}\" из {context.user_data['doc']}-{context.user_data['year']}. Переменные из какого набора Вас интересуют?", 
@@ -210,7 +210,7 @@ async def scenario_received(update, context):
         context.user_data['path_folders'] = path
 
         var_types = sorted(var_types, reverse=True)
-        keyboard = [[type] for type in var_types] + [['Выбрать другой документ']]
+        keyboard = [[type] for type in var_types] + [['Возврат к выбору документа']]
         reply_markup_year = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             f"Вы выбрали {context.user_data['doc']}-{context.user_data['year']}. Переменные из какого набора Вас интересуют?", 
