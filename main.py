@@ -121,7 +121,7 @@ async def year_received(update, context):
     reply_markup_doc_type = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
     await update.message.reply_text(
-        f"Вы выбрали {year} год. Какой документ Вам нужен?", 
+        f"Вы выбрали {context.user_data['year']} год. Какой документ Вам нужен?", 
         reply_markup = reply_markup_doc_type)
     
     return DOC
