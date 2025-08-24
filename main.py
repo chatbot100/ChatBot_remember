@@ -104,7 +104,7 @@ async def start(update, context):
 
 async def year_received(update, context):
     years = get_unique_doc_years('Данные')
-    if update.message.text not in years:
+    if update.message.text not in years and update.message.text!='На предыдущий шаг':
         keyboard = [years[i:i+3] for i in range(0, len(years), 3)]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
@@ -113,11 +113,11 @@ async def year_received(update, context):
         )
         return DOC_YEAR
 
-    year = update.message.text
-    context.user_data['year'] = year
+    if update.message.text!='На предыдущий шаг':
+        year = update.message.text
+        context.user_data['year'] = year
 
-    keyboard = get_doc_types_keyboard(context.user_data['year'])
-
+    keyboard = get_doc_types_keyboard(context.user_data['year']) + [['На предыдущий шаг']]
     reply_markup_doc_type = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
     await update.message.reply_text(
@@ -127,8 +127,12 @@ async def year_received(update, context):
     return DOC
 
 async def doc_type_received(update, context):
+    if update.message.text == 'На предыдущий шаг':
+        return await year_received(update, context)
+        
     keyboard = get_doc_types_keyboard(context.user_data['year'])
     docs = sum(keyboard, [])
+    keyboard = keyboard + [['На предыдущий шаг']]
     if update.message.text not in docs:
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
