@@ -104,7 +104,7 @@ async def start(update, context):
 
 async def year_received(update, context):
     years = get_unique_doc_years('Данные')
-    if update.message.text not in years and update.message.text!='На предыдущий шаг':
+    if update.message.text not in years and update.message.text!='Возврат к выбору года':
         keyboard = [years[i:i+3] for i in range(0, len(years), 3)]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
@@ -113,11 +113,11 @@ async def year_received(update, context):
         )
         return DOC_YEAR
 
-    if update.message.text!='На предыдущий шаг':
+    if update.message.text!='Возврат к выбору документа':
         year = update.message.text
         context.user_data['year'] = year
 
-    keyboard = get_doc_types_keyboard(context.user_data['year']) + [['На предыдущий шаг']]
+    keyboard = get_doc_types_keyboard(context.user_data['year']) + [['Возврат к выбору года']]
     reply_markup_doc_type = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
     await update.message.reply_text(
@@ -127,12 +127,12 @@ async def year_received(update, context):
     return DOC
 
 async def doc_type_received(update, context):
-    if update.message.text == 'На предыдущий шаг':
+    if update.message.text == 'Возврат к выбору года':
         return await start(update, context)
         
     keyboard = get_doc_types_keyboard(context.user_data['year'])
     docs = sum(keyboard, [])
-    keyboard = keyboard + [['На предыдущий шаг']]
+    keyboard = keyboard + [['Возврат к выбору года']]
     if update.message.text not in docs:
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
@@ -140,15 +140,16 @@ async def doc_type_received(update, context):
             reply_markup=reply_markup
         )
         return DOC
-    
-    doc_type = update.message.text
-    context.user_data['doc'] = doc_type
+
+    if update.message.text!='Возврат к выбору сценария':
+        doc_type = update.message.text
+        context.user_data['doc'] = doc_type
     
     directory = f"Данные/{context.user_data['year']}"
-    if doc_type == 'ОНДКП':
-        context.user_data['doc_item'] = doc_type
+    if context.user_data['doc'] == 'ОНДКП':
+        context.user_data['doc_item'] = context.user_data['doc']
         buttons = sorted(get_unique_scenarios(context.user_data['year']))
-        keyboard = [buttons[i:i+2] for i in range(0, len(buttons), 2)]
+        keyboard = [buttons[i:i+2] for i in range(0, len(buttons), 2)] + [['Возврат к выбору документа']]
         reply_markup_doc_type = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
         await update.message.reply_text(
@@ -157,26 +158,28 @@ async def doc_type_received(update, context):
     
         return SCENARIO
     
-    elif doc_type.split('-')[0] == 'Базовый прогноз':
+    elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         for item in os.listdir(directory):
             full_path = os.path.join(directory, item)
             if os.path.isdir(full_path):
-                if item.split('-')[0] == doc_type.split('-')[0] and item.split('-')[2] == doc_type.split('-')[1]:
+                if item.split('-')[0] == context.user_data['doc'].split('-')[0] and item.split('-')[2] == context.user_data['doc'].split('-')[1]:
                     context.user_data['doc_item'] = item
         return await scenario_received(update, context)
 
-    elif doc_type.split('-')[0] == 'Краткосрочный прогноз':
+    elif context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         for item in os.listdir(directory):
             full_path = os.path.join(directory, item)
-            if item.split('-')[0] == doc_type.split('-')[0] and item.split('-')[2].split('.')[0] == doc_type.split('-')[1]:
+            if item.split('-')[0] == context.user_data['doc'].split('-')[0] and item.split('-')[2].split('.')[0] == context.user_data['doc'].split('-')[1]:
                 context.user_data['doc_item'] = item
         return await scenario_received(update, context)
 
 async def scenario_received(update, context):
+    if update.message.text == 'Возврат к выбору документа':
+        return await year_received(update, context)
     if context.user_data['doc'] == 'ОНДКП':
         scenarios = sorted(get_unique_scenarios(context.user_data['year']))
-        if update.message.text not in scenarios  and update.message.text != 'Выбрать другой набор переменных':
-            keyboard = [scenarios[i:i+2] for i in range(0, len(scenarios), 2)]
+        if update.message.text not in scenarios  and update.message.text != 'Выбрать другой набор переменных' and update.message.text != 'Возврат к выбору набора переменных':
+            keyboard = [scenarios[i:i+2] for i in range(0, len(scenarios), 2)] + [['На предыдущий шаг']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await update.message.reply_text(
             "Пожалуйста, выберите сценарий из предложенных вариантов:",
@@ -192,7 +195,7 @@ async def scenario_received(update, context):
         context.user_data['path_folders'] = path
 
         var_types = sorted(var_types, reverse=True)
-        keyboard = [[type] for type in var_types]
+        keyboard = [[type] for type in var_types] + [['Выбрать другой сценарий']]
         reply_markup_year = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             f"Вы выбрали сценарий \"{context.user_data['scenario']}\" из {context.user_data['doc']}-{context.user_data['year']}. Переменные из какого набора Вас интересуют?", 
@@ -207,7 +210,7 @@ async def scenario_received(update, context):
         context.user_data['path_folders'] = path
 
         var_types = sorted(var_types, reverse=True)
-        keyboard = [[type] for type in var_types]
+        keyboard = [[type] for type in var_types] + [['Выбрать другой документ']]
         reply_markup_year = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
             f"Вы выбрали {context.user_data['doc']}-{context.user_data['year']}. Переменные из какого набора Вас интересуют?", 
@@ -223,11 +226,13 @@ async def scenario_received(update, context):
         return await var_group_received(update, context)
 
 async def var_group_received(update, context):
+    if update.message.text == 'На предыдущий шаг':
+        return await doc_type_received(update, context)
     if context.user_data['doc'] == 'ОНДКП' or context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         if update.message.text not in var_types and update.message.text != 'Выбрать другую переменную':
             var_types = sorted(var_types, reverse=True)
-            keyboard = [[type] for type in var_types]
+            keyboard = [[type] for type in var_types] + [['На предыдущий шаг']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await update.message.reply_text(
             "Пожалуйста, выберите группу переменных из предложенных вариантов:",
@@ -249,7 +254,7 @@ async def var_group_received(update, context):
     df = pd.read_excel(context.user_data['path'])
     vars_list = list(df.iloc[:, 0])
     
-    keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)]
+    keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)] + [['На предыдущий шаг']]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     if context.user_data['doc'] == 'ОНДКП':
