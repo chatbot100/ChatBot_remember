@@ -419,7 +419,7 @@ async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(commands)
 
 async def main_async() -> None:
-    application = Application.builder().token(bot_token).build()
+    application = Application.builder().token(bot_token).post_init(post_init).build()
     application.add_handler(CommandHandler("cancel", cancel), group=1)
     
     conv_handler = ConversationHandler(
