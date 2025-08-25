@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove # чтобы добавить интерактивные кнопки (опции) на выбор
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 import nest_asyncio
 import os
