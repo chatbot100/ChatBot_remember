@@ -311,7 +311,7 @@ async def vars_received(update, context):
         if context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
             keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)] + [['Возврат к выбору документа']]
         elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз' or context.user_data['doc'].split('-')[0] == 'ОНДКП':
-            keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)] + [['Возврат к выбору группы переменных']]
+            keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)] + [['Возврат к выбору набора переменных']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
                 "Пожалуйста, выберите переменную из предложенного списка:",
