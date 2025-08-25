@@ -6,6 +6,14 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 from background import keep_alive
+import logging
+from datetime import datetime
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 keep_alive()
 
@@ -14,6 +22,17 @@ nest_asyncio.apply()
 bot_token = os.environ['TELEGRAM_BOT_TOKEN']
 
 DOC_YEAR, DOC, SCENARIO, VAR_GROUP, VAR, PRED = range(6)
+
+def log_user_action(update: Update, action: str, context: CallbackContext = None):
+    user = update.effective_user
+    user_info = f"ID: {user.id}, Username: {user.username}, First Name: {user.first_name}"
+    message = f"User {user_info} - Action: {action} - Text: '{update.message.text}'"
+    
+    if context and context.user_data:
+        current_state = f"Current state: {list(context.user_data.keys())}"
+        message += f" - {current_state}"
+    
+    logger.info(message)
 
 def get_unique_doc_years(directory):
     """
@@ -90,6 +109,7 @@ def get_var_type(year, doc_item, scenario):
     return sorted(list(var_types)), directory
 
 async def start(update, context):
+    log_user_action(update, "Start command", context)
     context.user_data.clear()
     years = get_unique_doc_years('Данные')
     keyboard = [years[i:i+3] for i in range(0, len(years), 3)]
@@ -103,6 +123,7 @@ async def start(update, context):
     return DOC_YEAR
 
 async def year_received(update, context):
+    log_user_action(update, "Year selected", context)
     years = get_unique_doc_years('Данные')
     if update.message.text not in years and update.message.text!='↩️Возврат к выбору документа':
         keyboard = [years[i:i+3] for i in range(0, len(years), 3)]
@@ -128,6 +149,7 @@ async def year_received(update, context):
     return DOC
 
 async def doc_type_received(update, context):
+    log_user_action(update, "Doc_type selected", context)
     if update.message.text == '↩️Возврат к выбору года':
         return await start(update, context)
         
@@ -178,6 +200,7 @@ async def doc_type_received(update, context):
         return await scenario_received(update, context)
 
 async def scenario_received(update, context):
+    log_user_action(update, "Scenario selected", context)
     if update.message.text == '↩️Возврат к выбору документа':
         return await year_received(update, context)
     if context.user_data['doc'] == 'ОНДКП':
@@ -230,6 +253,7 @@ async def scenario_received(update, context):
         return await var_group_received(update, context)
 
 async def var_group_received(update, context):
+    log_user_action(update, "Var_group selected", context)
     if context.user_data['doc'] == 'ОНДКП' and update.message.text == '↩️Возврат к выбору сценария':
         return await doc_type_received(update, context)
     elif (context.user_data['doc'].split('-')[0] == 'Базовый прогноз' or context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз') and update.message.text == '↩️Возврат к выбору документа':
@@ -299,6 +323,7 @@ async def var_group_received(update, context):
     return VAR
 
 async def vars_received(update, context):
+    log_user_action(update, "Var selected", context)
     if context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз' and update.message.text == '↩️Возврат к выбору документа':
         return await year_received(update, context)
     elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз' or context.user_data['doc'].split('-')[0] == 'ОНДКП':
@@ -346,6 +371,7 @@ async def vars_received(update, context):
     return PRED
 
 async def pred_received(update, context):
+    log_user_action(update, "Action selected", context)
     if context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
         com = ['Заново', 'Выбрать другую переменную', 'Завершить']
         keyboard = [['Выбрать другую переменную'], ['Заново'], ['Завершить']]
@@ -373,6 +399,7 @@ async def pred_received(update, context):
         return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    log_user_action(update, "Cancel", context)
     if context.user_data.get('cancelled'):
         return ConversationHandler.END
     
