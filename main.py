@@ -145,7 +145,7 @@ async def doc_type_received(update, context):
             )
             return DOC
 
-    if context.user_data['doc'] = '-':
+    if context.user_data['doc'] == '-':
         doc_type = update.message.text
         context.user_data['doc'] = doc_type
     
