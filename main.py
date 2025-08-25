@@ -1,5 +1,6 @@
 from telegram import Update
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import BotCommand
 from telegram.ext import CallbackContext, Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 import nest_asyncio
 import os
@@ -411,7 +412,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data['cancelled'] = True
     return ConversationHandler.END
 
-async def post_init(application: Application) -> None:
+async def set_commands(application: Application) -> None:
     commands = [
         BotCommand("start", "Запустить бота"),
         BotCommand("cancel", "Отменить текущее действие"),
@@ -419,7 +420,10 @@ async def post_init(application: Application) -> None:
     await application.bot.set_my_commands(commands)
 
 async def main_async() -> None:
-    application = Application.builder().token(bot_token).post_init(post_init).build()
+    application = Application.builder().token(bot_token).build()
+
+    await set_commands(application)
+    
     application.add_handler(CommandHandler("cancel", cancel), group=1)
     
     conv_handler = ConversationHandler(
