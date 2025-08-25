@@ -232,7 +232,9 @@ async def scenario_received(update, context):
 async def var_group_received(update, context):
     if context.user_data['doc'] == 'ОНДКП' and update.message.text == 'Возврат к выбору сценария':
         return await doc_type_received(update, context)
-
+    elif (context.user_data['doc'].split('-')[0] == 'Базовый прогноз' or context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз') and update.message.text == 'Возврат к выбору документа':
+        return await year_received(update, context)
+        
     if context.user_data['doc'] == 'ОНДКП':
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
         if update.message.text not in var_types and update.message.text != 'Возврат к выбору переменной':
