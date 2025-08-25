@@ -237,7 +237,7 @@ async def var_group_received(update, context):
         
     if context.user_data['doc'] == 'ОНДКП':
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
-        if update.message.text not in var_types and update.message.text != 'Возврат к выбору переменной':
+        if update.message.text not in var_types and update.message.text != 'Выбрать другую переменную':
             var_types = sorted(var_types, reverse=True)
             keyboard = [[type] for type in var_types] + [['Возврат к выбору сценария']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -249,7 +249,7 @@ async def var_group_received(update, context):
     
     elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз':
         var_types, path = get_var_type(context.user_data['year'], context.user_data['doc_item'], context.user_data['scenario'])
-        if update.message.text not in var_types and update.message.text != 'Возврат к выбору переменной':
+        if update.message.text not in var_types and update.message.text != 'Выбрать другую переменную':
             var_types = sorted(var_types, reverse=True)
             keyboard = [[type] for type in var_types] + [['Возврат к выбору документа']]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -308,7 +308,10 @@ async def vars_received(update, context):
     df = pd.read_excel(context.user_data['path'])
     vars_list = list(df.iloc[:, 0])
     if update.message.text not in vars_list:
-        keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)]
+        if context.user_data['doc'].split('-')[0] == 'Краткосрочный прогноз':
+            keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)] + [['Возврат к выбору документа']]
+        elif context.user_data['doc'].split('-')[0] == 'Базовый прогноз' or context.user_data['doc'].split('-')[0] == 'ОНДКП':
+            keyboard = [vars_list[i:i+2] for i in range(0, len(vars_list), 2)] + [['Возврат к выбору группы переменных']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
                 "Пожалуйста, выберите переменную из предложенного списка:",
@@ -362,9 +365,9 @@ async def pred_received(update, context):
     if further == 'Заново':
         return await start(update, context)
     elif further == 'Выбрать другую переменную':
-        return await vars_received(update, context)
-    elif further == 'Выбрать другой набор переменных':
         return await var_group_received(update, context)
+    elif further == 'Выбрать другой набор переменных':
+        return await scenario_received(update, context)
     elif further == 'Завершить':
         await update.message.reply_text(text = 'Сессия завершена, для начала напишите /start',reply_markup = ReplyKeyboardRemove())
         return ConversationHandler.END
